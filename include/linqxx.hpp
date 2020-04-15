@@ -9,6 +9,7 @@
 #include "stl_enumerable.hpp"    // linqxx::stl_enumerable
 #include "where_enumerable.hpp"  // linqxx::where_enumerable
 #include "select_enumerable.hpp" // linqxx::select_enumerable
+#include "group_enumerable.hpp"  // linqxx::groupby_enumerable
 
 namespace linqxx
 {
