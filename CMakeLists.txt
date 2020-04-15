@@ -39,3 +39,7 @@ install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
               "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
         DESTINATION lib/cmake/${PROJECT_NAME})
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include/${PROJECT_NAME})
+
+add_custom_target(uninstall
+    "${CMAKE_COMMAND}" -P "${PROJECT_SOURCE_DIR}/cmake/uninstall.cmake"
+)
