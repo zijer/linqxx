@@ -53,7 +53,7 @@ std::shared_ptr<enumerable<TResult>> select_enumerable<TSource, TResult>::from(
     std::shared_ptr<enumerable<TSource>> source,
     TResult (*selector)(const TSource &))
 {
-    return std::unique_ptr<select_enumerable<TSource, TResult>>(new select_enumerable<TSource, TResult>(source, selector));
+    return std::shared_ptr<select_enumerable<TSource, TResult>>(new select_enumerable<TSource, TResult>(source, selector));
 };
 
 template <typename TSource, typename TResult>
@@ -69,7 +69,7 @@ select_enumerable<TSource, TResult>::select_enumerable(std::shared_ptr<enumerabl
 template <typename TSource, typename TResult>
 std::shared_ptr<enumerable<TResult>> select_enumerable<TSource, TResult>::share()
 {
-    return std::unique_ptr<select_enumerable<TSource, TResult>>(new select_enumerable<TSource, TResult>(source, selector));
+    return std::shared_ptr<select_enumerable<TSource, TResult>>(new select_enumerable<TSource, TResult>(source, selector));
 };
 
 template <typename T>

@@ -94,4 +94,19 @@ protected:
         return std::shared_ptr<groupby_enumerable<T, TKey>>(new groupby_enumerable<T, TKey>(source, selector));
     };
 };
+template <typename T>
+template <typename TKey, class Hash, class Pred>
+auto enumerable<T>::group_by(TKey (*selector)(const T &)) -> std::shared_ptr<enumerable<std::shared_ptr<grouping_enumerable<T, TKey>>>>
+{
+    return linqxx::groupby_enumerable<T, TKey, Hash, Pred>::from(this->share(), selector);
+};
+
+// template <typename T>
+// template <typename TF, class Hash, class Pred>
+// auto enumerable<T>::group_by(TF selector) -> std::shared_ptr<enumerable<std::shared_ptr<grouping_enumerable<T, decltype(selector(std::declval<const T &>))>>>>
+// {
+//     using TKey = decltype(selector(std::declval<const T &>));
+//     return linqxx::groupby_enumerable<T, TKey, Hash, Pred>::from(this->share(), selector);
+// };
+
 } // namespace linqxx

@@ -33,6 +33,7 @@ std::vector<T> enumerable<T>::to_vector()
     return res;
 };
 
+
 template <typename T>
 void enumerable<T>::for_each(void (*action)(T &))
 {
