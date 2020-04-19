@@ -27,7 +27,10 @@ class enumerable
 {
 public:
     virtual std::unique_ptr<enumerator<T>> enumerate() = 0;
-    std::shared_ptr<enumerable<T>> where(bool (*pred)(const T &));
+
+    template <typename TF>
+    std::shared_ptr<enumerable<T>> where(TF pred);
+
     template <typename TF, typename TResult = typename std::invoke_result<TF, const T &>::type>
     std::shared_ptr<enumerable<TResult>> select(TF selector);
 
