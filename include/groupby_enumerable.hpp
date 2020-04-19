@@ -1,31 +1,27 @@
 #pragma once
+
 #include <optional>           // std::optional
 #include <functional>         // std::equal_to
 #include <utility>            // std::hash
 #include <memory>             // std::shared_ptr
 #include <unordered_map>      // std::unordered_map
 #include <vector>             // std::vector
-#include "stl_enumerable.hpp" // linqxx::stl_enumerable
 #include "enumerable.hpp"     // linqxx::enumerable
+#include "stl_enumerable.hpp" // linqxx::stl_enumerable
 
 namespace linqxx
 {
 #define GROUP std::shared_ptr<grouping_enumerable<T, TKey>>
 
 template <typename T, typename TKey>
-class grouping_enumerable : public enumerable<T>
+class grouping_enumerable : public rstl_enumerable<std::vector<T>>
 {
-private:
-    std::vector<T> items_;
-
 public:
     const TKey key;
-    static GROUP from(TKey key, std::vector<T> items);
-    std::unique_ptr<enumerator<T>> enumerate();
-
+    static GROUP from(TKey key, std::vector<T>&& items);
 protected:
-    grouping_enumerable(TKey key, std::vector<T> items);
-    std::shared_ptr<enumerable<T>> share();
+    grouping_enumerable(TKey key, std::vector<T>&& items);
+    std::shared_ptr<enumerable<T>> share() override;
 };
 
 template <typename T, typename TKey>
@@ -56,25 +52,20 @@ protected:
 };
 
 template <typename T, typename TKey>
-GROUP grouping_enumerable<T, TKey>::from(TKey key, std::vector<T> items)
+GROUP grouping_enumerable<T, TKey>::from(TKey key, std::vector<T>&& items)
 {
-    return GROUP(new grouping_enumerable<T, TKey>(key, items));
+    return GROUP(new grouping_enumerable<T, TKey>(key, std::move(items)));
 };
 
 template <typename T, typename TKey>
-std::unique_ptr<enumerator<T>> grouping_enumerable<T, TKey>::enumerate()
-{
-    return std::unique_ptr<stl_enumerator<std::vector<T>>>(new stl_enumerator<std::vector<T>>(items_.begin(), items_.end()));
-};
-
-template <typename T, typename TKey>
-grouping_enumerable<T, TKey>::grouping_enumerable(TKey key, std::vector<T> items)
-    : key(key), items_(items){};
+grouping_enumerable<T, TKey>::grouping_enumerable(TKey key, std::vector<T>&& items)
+    : rstl_enumerable<std::vector<T>>(std::move(items)), key(key){};
 
 template <typename T, typename TKey>
 std::shared_ptr<enumerable<T>> grouping_enumerable<T, TKey>::share()
 {
-    return GROUP(new grouping_enumerable<T, TKey>(key, items_));
+    std::vector<T> copy = rstl_enumerable<std::vector<T>>::source;
+    return GROUP(new grouping_enumerable<T, TKey>(key, std::move(copy)));
 };
 
 template <typename T, typename TKey>
@@ -108,7 +99,8 @@ std::unique_ptr<enumerator<GROUP>> groupby_enumerable<T, TKey, Hash, Pred>::enum
     };
     for (auto key : keys)
     {
-        groups->push_back(grouping_enumerable<T, TKey>::from(key, groupings[key]));
+        groups->push_back(grouping_enumerable<T, TKey>::from(key, std::move(groupings.at(key))));
+        groupings.erase(key);
     }
     return std::unique_ptr<groupby_enumerator<T, TKey>>(new groupby_enumerator<T, TKey>(std::move(groups)));
 };
@@ -126,14 +118,14 @@ groupby_enumerable<T, TKey, Hash, Pred>::groupby_enumerable(std::shared_ptr<enum
 template <typename T, typename TKey, class Hash, class Pred>
 std::shared_ptr<enumerable<GROUP>> groupby_enumerable<T, TKey, Hash, Pred>::share()
 {
-    return std::shared_ptr<groupby_enumerable<T, TKey>>(new groupby_enumerable<T, TKey>(source, selector));
+    return groupby_enumerable<T, TKey>::from(source, selector);
 };
 
 template <typename T>
 template <typename TF, typename TKey, class Hash, class Pred>
-std::shared_ptr<enumerable<GROUP>> enumerable<T>::group_by(TF selector)
+std::shared_ptr<enumerable<GROUP>> enumerable<T>::groupby(TF selector)
 {
-    return linqxx::groupby_enumerable<T, TKey, Hash, Pred>::from(this->share(), selector);
+    return groupby_enumerable<T, TKey, Hash, Pred>::from(this->share(), selector);
 };
 
 #undef GROUP

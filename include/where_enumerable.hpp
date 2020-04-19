@@ -69,7 +69,7 @@ where_enumerable<T, TF>::where_enumerable(std::shared_ptr<enumerable<T>> source,
 template <typename T, typename TF>
 std::shared_ptr<enumerable<T>> where_enumerable<T, TF>::share()
 {
-    return std::shared_ptr<where_enumerable<T, TF>>(new where_enumerable<T, TF>(source, pred));
+    return where_enumerable<T, TF>::from(source, pred);
 };
 
 template <typename T>

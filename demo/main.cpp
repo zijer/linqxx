@@ -18,26 +18,27 @@ int main()
     std::vector<Human> people =
         {
             Human("bob", "adolfovich", 12),
-            Human("adolf", "bobovich", 15),
+            Human("a", "b", 15),
             Human("albert", "albertovich", 90),
             Human("mr", "polizai", 9),
             Human("pavel", "odentsov", 34),
             Human("ivan", "grechkin", 87),
             Human("john", "cena", 17),
             Human("seam", "seap", 21)};
-    linqxx::from(people)
-        ->where([](auto human) { return human.age > 16; })
-        ->group_by([](auto human) { return human.age > 40; })
-        ->for_each([](auto group) {
-            std::cout << (group->key ? "old" : "young") << std::endl;
-            group->for_each([](auto human) {
-                std::cout
-                    << "\t" << human.first_name
-                    << ' ' << human.last_name
-                    << '(' << human.age
-                    << "y.o.)" << std::endl;
-            });
-        });
+    auto ages = linqxx::from(std::move(people))
+                      ->select([](auto human) {
+                          return Human(human.first_name, human.last_name, human.age + 2);
+                      })
+                      ->where([](auto human) { return human.age > 16; })
+                      ->groupby([](auto human) { return human.age > 40; })
+                      ->selectmany([](auto group) {
+                          return group->select([](auto human) {
+                              return human.age;
+                          });
+                      });
+    ages->for_each([](auto age) {
+        std::cout << age << std::endl;
+    });
 
     return 0;
 }
