@@ -9,7 +9,7 @@ int main()
 
     linqxx::from(vec)
         ->where([](auto i) -> bool { return i % 5 == 0; })
-        ->group_by<int>([](auto i) -> int { return i % 3; })
+        ->group_by([](auto i) -> int { return i % 3; })
         ->for_each([](auto group)->void{
             std::cout << group->key << " " << group->to_vector().size() << std::endl;
         });

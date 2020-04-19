@@ -130,8 +130,8 @@ std::shared_ptr<enumerable<GROUP>> groupby_enumerable<T, TKey, Hash, Pred>::shar
 };
 
 template <typename T>
-template <typename TKey, class Hash, class Pred>
-auto enumerable<T>::group_by(TKey (*selector)(const T &)) -> std::shared_ptr<enumerable<GROUP>>
+template <typename TF, typename TKey, class Hash, class Pred>
+std::shared_ptr<enumerable<GROUP>> enumerable<T>::group_by(TF selector)
 {
     return linqxx::groupby_enumerable<T, TKey, Hash, Pred>::from(this->share(), selector);
 };

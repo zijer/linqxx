@@ -73,10 +73,9 @@ std::shared_ptr<enumerable<TResult>> select_enumerable<TSource, TResult>::share(
 };
 
 template <typename T>
-template <typename TF>
-auto enumerable<T>::select(TF selector) -> std::shared_ptr<enumerable<decltype(selector(std::declval<const T &>))>>
+template <typename TF, typename TResult>
+std::shared_ptr<enumerable<TResult>> enumerable<T>::select(TF selector)
 {
-    using TResult = decltype(selector(std::declval<const T &>));
     return select_enumerable<T, TResult>::from(this->share(), selector);
 };
 
