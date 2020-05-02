@@ -8,44 +8,7 @@
 namespace linqxx
 {
 template <typename T>
-class enumerator;
-template <typename T>
-class iterator
-{
-private:
-    std::shared_ptr<enumerator<T>> source; 
-    std::optional<T> last;
-    iterator() : source(nullptr), last(std::nullopt){};
-
-public:
-    static iterator<T> end()
-    {
-        return iterator<T>();
-    };
-    iterator(std::unique_ptr<enumerator<T>> source) : source(std::move(source))
-    {
-        last = std::optional<T>(this->source->next());
-    };
-    iterator<T> operator++()
-    {
-        last = std::optional<T>(source->next());
-        return *this;
-    };
-    bool operator==(iterator<T> other) const
-    {
-        return (!last.has_value() && !other.last.has_value()) || source.get() == other.source.get();
-    };
-    bool operator!=(iterator<T> other) const
-    {
-        return !(this->operator==(other));
-    };
-    T operator*()
-    { 
-        return last.value(); 
-    }
-    using value_type = T;
-    using iterator_category = std::input_iterator_tag;
-};
+class iterator;
 
 template <typename T>
 class enumerator
@@ -65,6 +28,10 @@ public:
     using value_type = T;
     virtual std::unique_ptr<enumerator<T>> enumerate() = 0;
 
+    iterator<T> begin();
+    iterator<T> end();
+
+
     template <typename TF>
     std::shared_ptr<enumerable<T>> where(TF pred);
 
@@ -77,18 +44,13 @@ public:
     template <typename TF, typename TResult = typename std::invoke_result<TF, const T &>::type::element_type::value_type>
     std::shared_ptr<enumerable<TResult>> selectmany(TF selector);
 
+    T first();
+    T last();
+
     std::vector<T> to_vector();
     void for_each(void (*action)(T &));
 
-    iterator<T> begin()
-    {
-        return iterator<T>(enumerate());
-    };
-
-    iterator<T> end()
-    {
-        return iterator<T>::end();
-    }
+    
 
 protected:
     virtual std::shared_ptr<enumerable<T>> share() = 0;
