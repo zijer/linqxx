@@ -15,27 +15,32 @@ public:
 
 int main()
 {
-    std::vector<Human> people =
-        {
-            Human("bob", "adolfovich", 12),
-            Human("a", "b", 15),
-            Human("albert", "albertovich", 90),
-            Human("mr", "polizai", 9),
-            Human("pavel", "odentsov", 34),
-            Human("ivan", "grechkin", 87),
-            Human("john", "cena", 17),
-            Human("seam", "seap", 21)};
+    std::vector<Human> people = {
+        Human("bob", "adolfovich", 12),
+        Human("a", "b", 15),
+        Human("albert", "albertovich", 90),
+        Human("mr", "polizai", 9),
+        Human("pavel", "odentsov", 34),
+        Human("ivan", "grechkin", 87),
+        Human("john", "cena", 17),
+        Human("seam", "seap", 21)};
     auto ages = linqxx::from(std::move(people))
-                      ->select([](auto human) {
-                          return Human(human.first_name, human.last_name, human.age + 2);
-                      })
-                      ->where([](auto human) { return human.age > 16; })
-                      ->groupby([](auto human) { return human.age > 40; })
-                      ->selectmany([](auto group) {
-                          return group->select([](auto human) {
-                              return human.age;
-                          });
-                      });
+                    ->select([](auto human) {
+                        return Human(human.first_name, human.last_name, human.age + 2);
+                    })
+                    ->where([](auto human) { return human.age > 16; })
+                    ->groupby([](auto human) { return human.age > 40; })
+                    ->selectmany([](auto group) {
+                        return group->select([](auto human) {
+                            return human.age;
+                        });
+                    });
+
+    for (auto t : *ages)
+    {
+        std::cout << t << std::endl;
+    }
+
     ages->for_each([](auto age) {
         std::cout << age << std::endl;
     });
